@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Get in Touch — StudyMate AI{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-20">
+  <div class="grid lg:grid-cols-2 gap-20 items-stretch">
+
+    <!-- Left Pane: Contact Info -->
+    <div class="flex flex-col justify-center animate-fade-in">
+      <h1 class="text-5xl md:text-6xl font-extrabold font-outfit text-slate-900 mb-8 tracking-tight">Let's start
+        <br /><span class="gradient-text">a conversation.</span>
+      </h1>
+      <p class="text-xl text-slate-500 font-medium leading-relaxed mb-12">
+        Have a question about our features? Need technical support?
+        Or just want to say hi? We're here to help you study smarter.
+      </p>
+
+      <div class="space-y-8">
+        <div class="flex gap-6 group">
+          <div
+            class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+            <i class="fas fa-envelope-open text-xl"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-1 text-lg">Email Us</h4>
+            <p class="text-slate-500 font-medium">StudyMateAI@gmail.com</p>
+          </div>
+        </div>
+
+        <div class="flex gap-6 group">
+          <div
+            class="w-14 h-14 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0 group-hover:bg-violet-600 group-hover:text-white transition-all">
+            <i class="fas fa-location-dot text-xl"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-1 text-lg">Office</h4>
+            <p class="text-slate-500 font-medium">Virtual Campus, Cloud Workspace</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Links -->
+      <div class="mt-16 flex gap-4">
+        <a href="#"
+          class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all"><i
+            class="fab fa-twitter"></i></a>
+        <a href="#"
+          class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all"><i
+            class="fab fa-linkedin"></i></a>
+        <a href="#"
+          class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-900 hover:text-white transition-all"><i
+            class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+
+    <!-- Right Pane: Contact Form -->
+    <div class="premium-card p-10 md:p-14 animate-fade-in" style="animation-delay: 0.1s">
+      <form id="contactForm" class="space-y-8">
+        <div class="grid md:grid-cols-2 gap-8">
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Full Name</label>
+            <input type="text" id="name" required
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="Zayn Malik">
+          </div>
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Email Address</label>
+            <input type="email" id="email" required
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="zayn@study.ai">
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">How can we help?</label>
+          <select
+            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 outline-none">
+            <option>General Inquiry</option>
+            <option>Technical Support</option>
+            <option>Feature Request</option>
+            <option>Partnership</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Message</label>
+          <textarea id="message" rows="6" required
+            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 resize-none"
+            placeholder="Hey team, I'd love to know more about..."></textarea>
+        </div>
+
+        <button type="submit" class="w-full btn-premium btn-premium-primary py-5 text-xl">
+          <span>Dispatch Intel</span>
+          <i class="fas fa-paper-plane ml-3 text-sm"></i>
+        </button>
+      </form>
+
+      <p id="formStatus" class="text-center mt-6 text-xs font-bold text-slate-400 uppercase tracking-wide"></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function submitForm(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    const status = document.getElementById('formStatus');
+
+    btn.disabled = true;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> TRANSMITTING...`;
+    status.textContent = "Connecting to secure mail server...";
+
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+    const subject = e.target.querySelector('select').value;
+    const message = document.getElementById('message').value;
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, subject, message })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        status.innerHTML = `<span class="text-emerald-500"><i class="fas fa-check-circle mr-2"></i> ${data.message}</span>`;
+        e.target.reset();
+      } else {
+        throw new Error(data.error || "Transmission failed");
+      }
+    } catch (err) {
+      status.innerHTML = `<span class="text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i> Error: ${err.message}</span>`;
+    } finally {
+      btn.innerHTML = originalContent;
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('contactForm').addEventListener('submit', submitForm);
+</script>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Login — StudyMate AI{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center -mt-20">
+  <!-- Negative margin to account for floating nav height better -->
+  <div
+    class="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-[32px] overflow-hidden shadow-2xl border border-slate-100 animate-fade-in mx-4">
+
+    <!-- Left Side: Interactive Branding -->
+    <div class="hidden lg:flex flex-col justify-between p-12 gradient-bg text-white relative overflow-hidden">
+      <div class="relative z-10 space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+          <i class="fas fa-key text-xl"></i>
+        </div>
+        <h2 class="text-4xl font-extrabold font-outfit">Unlock your potential.</h2>
+        <p class="text-white/80 font-medium max-w-xs">Access your personal AI workspace and continue your journey to
+          academic excellence.</p>
+      </div>
+
+      <div class="relative z-10 space-y-6">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <i class="fas fa-check"></i>
+          </div>
+          <span class="text-sm font-bold">Safe & Secure Storage</span>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+            <i class="fas fa-check"></i>
+          </div>
+          <span class="text-sm font-bold">Sync Across All Devices</span>
+        </div>
+      </div>
+
+      <!-- Abstract Background Shapes -->
+      <div class="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-indigo-400/20 rounded-full blur-2xl"></div>
+    </div>
+
+    <!-- Right Side: Login Form -->
+    <div class="p-8 sm:p-12 md:p-16 flex flex-col justify-center">
+      <div class="mb-10 lg:hidden">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
+            <i class="fas fa-brain text-white text-sm"></i>
+          </div>
+          <div class="font-bold text-slate-900 text-xl font-outfit">StudyMate AI</div>
+        </div>
+        <h3 class="text-2xl font-bold">Welcome Back</h3>
+      </div>
+
+      <div class="hidden lg:block mb-10">
+        <h3 class="text-3xl font-extrabold font-outfit text-slate-900 mb-2">Sign In</h3>
+        <p class="text-slate-500 font-medium">Enter your credentials to access your intel.</p>
+      </div>
+
+      <form id="loginForm" class="space-y-6">
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Email Address</label>
+          <div class="relative group">
+            <i
+              class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors"></i>
+            <input type="email" id="username"
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all"
+              placeholder="name@example.com" required>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">Password</label>
+            <a href="/forgot-password" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">Forgot?</a>
+          </div>
+          <div class="relative group">
+            <i
+              class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-600 transition-colors"></i>
+            <input type="password" id="password"
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-6 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all"
+              placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full btn-premium btn-premium-primary py-4 text-lg">
+          <span>Log In</span>
+          <i class="fas fa-arrow-right ml-2 text-sm"></i>
+        </button>
+      </form>
+
+      <div class="mt-12 pt-8 border-t border-slate-100 text-center">
+        <p class="text-slate-500 text-sm font-medium">
+          New to StudyMate?
+          <a href="/signup" class="text-indigo-600 font-bold hover:underline ml-1">Create an Account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+    const btn = e.target.querySelector('button');
+    const originalText = btn.innerHTML;
+
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Authenticating...`;
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.message === 'Login successful') {
+        localStorage.setItem('loggedInUser', data.username);
+        window.location.href = "/app";
+      } else {
+        alert(data.error || "Login failed");
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    } catch (err) {
+      alert("Error connecting to server");
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+</script>
+{% endblock %}

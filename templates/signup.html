@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account — StudyMate AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rule-item {
+    transition: all 0.3s ease;
+  }
+
+  .rule-valid {
+    color: #10b981;
+  }
+
+  .rule-invalid {
+    color: #ef4444;
+  }
+
+  .password-strength {
+    height: 6px;
+    border-radius: 10px;
+    transition: all 0.4s ease;
+    background-color: #e2e8f0;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center -mt-10 py-12">
+  <div
+    class="w-full max-w-5xl grid lg:grid-cols-2 bg-white rounded-[32px] overflow-hidden shadow-2xl border border-slate-100 animate-fade-in mx-4">
+
+    <!-- Left Side: Branding/Value Prop -->
+    <div class="hidden lg:flex flex-col justify-between p-12 bg-slate-900 text-white relative overflow-hidden">
+      <div class="relative z-10 space-y-6">
+        <div class="w-14 h-14 rounded-2xl gradient-bg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <i class="fas fa-rocket text-2xl"></i>
+        </div>
+        <h2 class="text-4xl font-extrabold font-outfit leading-tight">Join the future of <br /><span
+            class="gradient-text">intelligent learning.</span></h2>
+        <div class="space-y-6 pt-8">
+          <div class="flex gap-4">
+            <div
+              class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-[10px]"></i>
+            </div>
+            <p class="text-slate-300 text-sm font-medium">Generate unlimited AI summaries for your lectures.</p>
+          </div>
+          <div class="flex gap-4">
+            <div
+              class="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-[10px]"></i>
+            </div>
+            <p class="text-slate-300 text-sm font-medium">Create custom quizzes to prep for your exams.</p>
+          </div>
+          <div class="flex gap-4">
+            <div
+              class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0 mt-1">
+              <i class="fas fa-check text-[10px]"></i>
+            </div>
+            <p class="text-slate-300 text-sm font-medium">Free forever basic plan with secure data syncing.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative z-10 p-6 rounded-2xl bg-white/5 backdrop-blur border border-white/10">
+        <div class="flex items-center gap-3 mb-3">
+          <img src="https://i.pravatar.cc/100?u=tech" class="w-10 h-10 rounded-full border border-white/20"
+            alt="Avatar">
+          <div>
+            <div class="text-sm font-bold">Zayn Tech</div>
+            <div class="text-[10px] text-slate-400 font-bold uppercase">Computer Science Major</div>
+          </div>
+        </div>
+        <p class="text-xs text-slate-300 italic leading-relaxed">"This tool changed how I study for my finals. The AI
+          summaries are pinpoint accurate!"</p>
+      </div>
+
+      <!-- Background Circles -->
+      <div class="absolute -top-10 -right-10 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl"></div>
+      <div class="absolute top-1/2 -left-20 w-80 h-80 bg-violet-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Right Side: Signup Form -->
+    <div class="p-8 sm:p-12 md:p-16 flex flex-col justify-center">
+      <div class="mb-8">
+        <h3 class="text-3xl font-extrabold font-outfit text-slate-900 mb-2">Create Account</h3>
+        <p class="text-slate-500 font-medium font-inter">Start your 14-day pro trial today.</p>
+      </div>
+
+      <form id="signupForm" class="space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Username</label>
+            <input type="text" id="newUsername"
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="zayn_dev" required>
+          </div>
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Email</label>
+            <input type="email" id="newEmail"
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="zayn@study.ai" required>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Password</label>
+          <div class="relative">
+            <input type="password" id="newPassword"
+              class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-5 text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="••••••••" required>
+            <button type="button" id="togglePassword"
+              class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              <i class="far fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Strength Indicator -->
+        <div class="space-y-3 px-1">
+          <div class="flex gap-1.5" id="strengthBars">
+            <div class="password-strength flex-1"></div>
+            <div class="password-strength flex-1"></div>
+            <div class="password-strength flex-1"></div>
+            <div class="password-strength flex-1"></div>
+          </div>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 mt-2">
+            <div id="ruleLength" class="text-[10px] font-bold text-slate-300 flex items-center gap-1.5"><i
+                class="fas fa-circle text-[6px]"></i> 8+ characters</div>
+            <div id="ruleUppercase" class="text-[10px] font-bold text-slate-300 flex items-center gap-1.5"><i
+                class="fas fa-circle text-[6px]"></i> Uppercase</div>
+            <div id="ruleNumber" class="text-[10px] font-bold text-slate-300 flex items-center gap-1.5"><i
+                class="fas fa-circle text-[6px]"></i> One Number</div>
+            <div id="ruleSpecial" class="text-[10px] font-bold text-slate-300 flex items-center gap-1.5"><i
+                class="fas fa-circle text-[6px]"></i> Special Char</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 py-2">
+          <input type="checkbox" id="terms" required
+            class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+          <label for="terms" class="text-xs text-slate-500 font-medium">I agree to the <a href="#"
+              class="text-indigo-600 hover:underline">Terms</a> and <a href="#"
+              class="text-indigo-600 hover:underline">Privacy Policy</a></label>
+        </div>
+
+        <button type="submit" id="signupBtn" class="w-full btn-premium btn-premium-primary py-4 text-lg">
+          Create My Workspace
+        </button>
+      </form>
+
+      <div class="mt-8 pt-6 border-t border-slate-100 text-center">
+        <p class="text-slate-500 text-sm font-medium">Already a member? <a href="/login"
+            class="text-indigo-600 font-bold hover:underline ml-1">Log In</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const pw = document.getElementById('newPassword');
+  const toggle = document.getElementById('togglePassword');
+  const bars = document.querySelectorAll('.password-strength');
+
+  toggle.addEventListener('click', () => {
+    const isPw = pw.type === 'password';
+    pw.type = isPw ? 'text' : 'password';
+    toggle.innerHTML = `<i class="far fa-eye${isPw ? '-slash' : ''}"></i>`;
+  });
+
+  pw.addEventListener('input', async () => {
+    const password = pw.value;
+    if (!password) {
+      bars.forEach(b => b.style.backgroundColor = '#e2e8f0');
+      document.querySelectorAll('[id^="rule"]').forEach(r => r.className = 'text-[10px] font-bold text-slate-300 flex items-center gap-1.5');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/check-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      const rules = data.rules;
+
+      // Update Rules UI
+      updateRule('ruleLength', rules.length);
+      updateRule('ruleUppercase', rules.uppercase);
+      updateRule('ruleNumber', rules.number);
+      updateRule('ruleSpecial', rules.special);
+
+      // Update Strength Bars
+      const validCount = Object.values(rules).filter(v => v).length;
+      bars.forEach((b, i) => {
+        if (i < validCount) {
+          b.style.backgroundColor = validCount < 2 ? '#ef4444' : validCount < 4 ? '#f59e0b' : '#10b981';
+        } else {
+          b.style.backgroundColor = '#e2e8f0';
+        }
+      });
+    } catch (e) { }
+  });
+
+  function updateRule(id, valid) {
+    const el = document.getElementById(id);
+    if (valid) {
+      el.className = 'text-[10px] font-bold text-emerald-500 flex items-center gap-1.5';
+      el.querySelector('i').className = 'fas fa-check-circle text-[8px]';
+    } else {
+      el.className = 'text-[10px] font-bold text-slate-300 flex items-center gap-1.5';
+      el.querySelector('i').className = 'fas fa-circle text-[6px]';
+    }
+  }
+
+  document.getElementById("signupForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const username = document.getElementById("newUsername").value;
+    const email = document.getElementById("newEmail").value;
+    const password = pw.value;
+
+    const btn = document.getElementById('signupBtn');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i> Initializing...`;
+
+    try {
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.message === 'Signup successful') {
+        window.location.href = "/login?signup=success";
+      } else {
+        alert(data.error || "Signup failed");
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    } catch (err) {
+      alert("Connection error");
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}About Our Vision — StudyMate AI{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="pt-24 pb-16 bg-white overflow-hidden relative">
+  <div class="max-w-4xl mx-auto px-6 text-center animate-fade-in">
+    <h1 class="text-5xl md:text-6xl font-extrabold font-outfit text-slate-900 mb-6 tracking-tight">Our mission is to
+      <br /><span class="gradient-text">humanize learning.</span></h1>
+    <p class="text-lg text-slate-500 font-medium leading-relaxed">
+      We believe that education shouldn't be a chore of memorization,
+      but a journey of understanding. StudyMate AI was born to bridge
+      the gap between massive amounts of information and genuine knowledge.
+    </p>
+  </div>
+
+  <!-- Abstract background -->
+  <div class="absolute -top-40 -left-40 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 -z-10"></div>
+</section>
+
+<!-- Vision & Impact -->
+<section class="py-20 max-w-7xl mx-auto px-6">
+  <div class="grid md:grid-cols-2 gap-12">
+    <div class="premium-card p-10 flex flex-col justify-center animate-fade-in" style="animation-delay: 0.1s">
+      <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-8">
+        <i class="fas fa-mountain text-2xl"></i>
+      </div>
+      <h2 class="text-3xl font-bold font-outfit mb-6">The Vision</h2>
+      <p class="text-slate-600 leading-relaxed text-lg">
+        Imagine a world where every student has a personalized AI tutor that understands their notes better than they
+        do.
+        We're building that world. One summary, one quiz, and one focused session at a time.
+      </p>
+    </div>
+
+    <div class="premium-card p-10 flex flex-col justify-center animate-fade-in" style="animation-delay: 0.2s">
+      <div class="w-16 h-16 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center mb-8">
+        <i class="fas fa-heart text-2xl"></i>
+      </div>
+      <h2 class="text-3xl font-bold font-outfit mb-6">The Impact</h2>
+      <p class="text-slate-600 leading-relaxed text-lg">
+        Students using StudyMate AI report a 40% reduction in study time and a significant boost in confidence before
+        exams.
+        We're not just saving time; we're reducing academic stress.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Tech Stack -->
+<section class="py-24 bg-slate-50">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="mb-16 text-center">
+      <h2 class="text-4xl font-extrabold font-outfit text-slate-900 mb-4">Built with cutting-edge tech.</h2>
+      <p class="text-slate-500 font-medium">Powering the fastest AI interactions on the web.</p>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="premium-card text-center group cursor-default">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🚀</div>
+        <h3 class="font-bold text-slate-900">Gemini Pro</h3>
+        <p class="text-xs text-slate-400 font-bold uppercase mt-1">Core Intelligence</p>
+      </div>
+      <div class="premium-card text-center group cursor-default">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">⚡</div>
+        <h3 class="font-bold text-slate-900">Flask Lab</h3>
+        <p class="text-xs text-slate-400 font-bold uppercase mt-1">Robust Backend</p>
+      </div>
+      <div class="premium-card text-center group cursor-default">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🎨</div>
+        <h3 class="font-bold text-slate-900">Modern UX</h3>
+        <p class="text-xs text-slate-400 font-bold uppercase mt-1">Tailwind + Glass</p>
+      </div>
+      <div class="premium-card text-center group cursor-default">
+        <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">🛡️</div>
+        <h3 class="font-bold text-slate-900">Security First</h3>
+        <p class="text-xs text-slate-400 font-bold uppercase mt-1">Encrypted Intel</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-24 max-w-7xl mx-auto px-6">
+  <div class="grid lg:grid-cols-2 gap-20 items-center">
+    <div class="space-y-8 animate-fade-in">
+      <h2 class="text-4xl font-extrabold font-outfit text-slate-900">We care about <span class="gradient-text">your
+          privacy.</span></h2>
+      <div class="space-y-6">
+        <div class="flex gap-6">
+          <div
+            class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-lock"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-1 text-lg">Local-First Processing</h4>
+            <p class="text-slate-500 leading-relaxed">Your files are processed in real-time and never used for training
+              models without consent.</p>
+          </div>
+        </div>
+        <div class="flex gap-6">
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 mb-1 text-lg">No Hidden Data Sales</h4>
+            <p class="text-slate-500 leading-relaxed">We don't sell student data. Our business is built on your success,
+              not your metadata.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative hidden lg:block">
+      <div class="premium-card p-12 bg-white relative z-10">
+        <h3 class="text-sm font-extrabold text-indigo-600 uppercase mb-4 tracking-widest text-center">Open Transparency
+        </h3>
+        <p class="text-slate-600 text-center text-sm leading-loose">
+          "At StudyMate AI, we believe transparency is the foundation of trust in education.
+          Every algorithm we use is designed to augment human intelligence, never to replace it."
+        </p>
+      </div>
+      <div class="absolute inset-0 bg-indigo-600 rounded-3xl -rotate-3 -z-10 translate-x-4 translate-y-4 opacity-5">
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

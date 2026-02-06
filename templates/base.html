@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="StudyMate AI - Your professional intelligent learning assistant." />
+    <title>{% block title %}StudyMate AI{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                        },
+                    },
+                    borderRadius: {
+                        'xl': '1rem',
+                        '2xl': '1.5rem',
+                        '3xl': '2rem',
+                    },
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-[#F8FAFC] min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav id="main-nav" class="nav-floating glass-effect mt-4 mx-4 sm:mx-auto">
+        <div class="flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                    <i class="fas fa-brain text-white text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-xl font-extrabold font-outfit tracking-tight">StudyMate <span
+                            class="gradient-text">AI</span></div>
+                </div>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8">
+                <a href="/"
+                    class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Home</a>
+                <a href="/app"
+                    class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Dashboard</a>
+                <a href="/history"
+                    class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">History</a>
+                <a href="/about"
+                    class="text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">Our Story</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="auth-actions" class="flex gap-2">
+                    <!-- Dynamic auth buttons -->
+                </div>
+                <button class="md:hidden text-slate-600" id="mobile-menu-btn">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 mt-20">
+        <div class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 gradient-bg rounded-lg flex items-center justify-center">
+                            <i class="fas fa-brain text-white text-sm"></i>
+                        </div>
+                        <div class="font-bold text-white text-xl font-outfit">StudyMate AI</div>
+                    </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Revolutionizing the way you study with cutting-edge artificial intelligence.
+                        Summarize, analyze, and master any subject with ease.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-indigo-600 transition-all text-white"><i
+                                class="fab fa-twitter"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-indigo-600 transition-all text-white"><i
+                                class="fab fa-linkedin"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-indigo-600 transition-all text-white"><i
+                                class="fab fa-github"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-6 font-outfit">Product</h3>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="/app" class="hover:text-indigo-400 transition-colors">AI Summarizer</a></li>
+                        <li><a href="/app" class="hover:text-indigo-400 transition-colors">Quiz Generator</a></li>
+                        <li><a href="/history" class="hover:text-indigo-400 transition-colors">Study History</a></li>
+                        <li><a href="/contact" class="hover:text-indigo-400 transition-colors">Feedback</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-6 font-outfit">Resources</h3>
+                    <ul class="space-y-4 text-sm">
+                        <li><a href="#" class="hover:text-indigo-400 transition-colors">User Guide</a></li>
+                        <li><a href="#" class="hover:text-indigo-400 transition-colors">API Reference</a></li>
+                        <li><a href="#" class="hover:text-indigo-400 transition-colors">Community Study Groups</a></li>
+                        <li><a href="#" class="hover:text-indigo-400 transition-colors">Support Center</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-white font-bold mb-6 font-outfit">Stay Updated</h3>
+                    <p class="text-sm text-slate-400 mb-4">Join our newsletter for study tips and AI updates.</p>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Email address"
+                            class="bg-slate-800 border-none rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 w-full" />
+                        <button class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-lg transition-colors"><i
+                                class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-slate-500">© 2024 StudyMate AI Inc. All rights reserved.</p>
+                <div class="flex gap-6 text-xs text-slate-500">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Global fetch interceptor for auth
+        const originalFetch = window.fetch;
+        window.fetch = async (...args) => {
+            const response = await originalFetch(...args);
+
+            // If API returns 401 and it's not a login/signup attempt, redirect to login
+            const url = args[0].toString();
+            const isAuthRoute = url.includes('/api/login') || url.includes('/api/signup') || url.includes('/api/auth-status');
+
+            if (response.status === 401 && !isAuthRoute && url.includes('/api/')) {
+                window.location.href = '/login';
+            }
+            return response;
+        };
+
+        async function updateAuthUI() {
+            const authActions = document.getElementById('auth-actions');
+
+            try {
+                const res = await fetch('/api/auth-status');
+                const data = await res.json();
+
+                if (data.authenticated) {
+                    localStorage.setItem('loggedInUser', data.username);
+                    authActions.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <a href="/profile" class="hidden sm:flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
+                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                    <i class="fas fa-user text-xs"></i>
+                                </div>
+                                <span class="max-w-[100px] truncate">${data.username}</span>
+                            </a>
+                            <button onclick="handleLogout()" class="btn-premium btn-premium-secondary text-sm">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    localStorage.removeItem('loggedInUser');
+                    authActions.innerHTML = `
+                        <a href="/login" class="btn-premium btn-premium-primary text-sm">
+                            Login Now <i class="fas fa-arrow-right text-[10px]"></i>
+                        </a>
+                    `;
+                }
+            } catch (err) {
+                console.error("Auth sync failed", err);
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (err) { }
+            localStorage.removeItem('loggedInUser');
+            window.location.href = '/login';
+        }
+
+        document.addEventListener('DOMContentLoaded', updateAuthUI);
+
+        // Mobile menu placeholder
+        document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+            alert('Mobile menu coming soon in this professional overhaul!');
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

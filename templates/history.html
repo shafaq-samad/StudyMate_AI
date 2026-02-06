@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Study History — StudyMate AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .history-card {
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--slate-100);
+    background: white;
+  }
+
+  .history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    border-color: var(--primary-100);
+  }
+
+  .badge {
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .badge-summary {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .badge-quiz {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  .badge-cards {
+    background: #fdf2f8;
+    color: #db2777;
+  }
+
+  .badge-qa {
+    background: #fff7ed;
+    color: #d97706;
+  }
+
+  /* Custom Modal Glass */
+  .pro-modal {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+</style>
+<script>
+  if (!localStorage.getItem("loggedInUser")) window.location.href = "/login";
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+  <!-- Hero Header -->
+  <div class="mb-12 animate-fade-in">
+    <h1 class="text-4xl md:text-5xl font-extrabold font-outfit text-slate-900 mb-4 tracking-tight">Your Intel <span
+        class="gradient-text">Repository</span></h1>
+    <p class="text-slate-500 text-lg max-w-2xl font-medium">Review, manage, and revisit your generated summaries and
+      study sessions. Everything you've ever analyzed is safe here.</p>
+  </div>
+
+  <!-- Filters & Actions -->
+  <div class="premium-card p-6 mb-12 flex flex-col md:flex-row items-center gap-6 animate-fade-in"
+    style="animation-delay: 0.1s">
+    <div class="relative flex-grow w-full">
+      <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+      <input type="text" id="searchInput" placeholder="Search by topic or content..."
+        class="w-full bg-slate-50 border-none rounded-xl py-3 pl-12 pr-6 text-slate-700 font-medium focus:ring-2 focus:ring-indigo-600">
+    </div>
+
+    <div class="flex items-center gap-4 w-full md:w-auto">
+      <select id="sortSelect"
+        class="bg-slate-50 border-none rounded-xl px-6 py-3 text-sm font-bold text-slate-600 focus:ring-2 focus:ring-indigo-600 outline-none">
+        <option value="desc">Newest First</option>
+        <option value="asc">Oldest First</option>
+      </select>
+
+      <button onclick="clearAllHistory()"
+        class="btn-premium btn-premium-secondary text-red-500 border-red-100 hover:bg-red-50">
+        <i class="fas fa-trash-can mr-2"></i> Wipe All
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="flex items-center gap-6 mb-8 px-2 animate-fade-in" style="animation-delay: 0.2s">
+    <div class="text-sm font-bold text-slate-400 uppercase tracking-widest"><span id="historyCount"
+        class="text-indigo-600">0</span> Entries Saved</div>
+    <div class="h-px flex-grow bg-slate-100"></div>
+  </div>
+
+  <!-- History Grid -->
+  <div id="historyContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20 animate-fade-in"
+    style="animation-delay: 0.3s">
+    <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-300">
+      <i class="fas fa-circle-notch fa-spin text-4xl mb-4 text-indigo-200"></i>
+      <p class="font-bold">Syncing your history...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Premium Details Modal -->
+<div id="modalOverlay" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeModal()"></div>
+  <div
+    class="relative bg-white rounded-[32px] shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden flex flex-col animate-fade-in">
+    <div class="p-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-4">
+        <div id="modalIcon" class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"></div>
+        <div>
+          <h2 class="text-xl font-extrabold font-outfit text-slate-900" id="modalTitle">Entry Details</h2>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-tight" id="modalTimestamp"></p>
+        </div>
+      </div>
+      <button onclick="closeModal()"
+        class="w-10 h-10 rounded-full hover:bg-white flex items-center justify-center text-slate-400 transition-colors">
+        <i class="fas fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <div class="p-8 overflow-y-auto pro-output border-none text-lg leading-relaxed" id="modalContent"></div>
+
+    <div class="p-8 bg-slate-50/80 border-t border-slate-100 flex gap-4">
+      <button onclick="copyModalContent()" class="btn-premium btn-premium-primary flex-grow">
+        <i class="fas fa-copy mr-2"></i> Copy Intel
+      </button>
+      <button onclick="closeModal()" class="btn-premium btn-premium-secondary px-8">Close</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let allHistory = [];
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
+
+    el('searchInput').addEventListener('input', filterAndRender);
+    el('sortSelect').addEventListener('change', loadHistory);
+  });
+
+  const el = id => document.getElementById(id);
+
+  async function loadHistory() {
+    const sort = el('sortSelect').value;
+    try {
+      const res = await fetch(`/api/history?sort=${sort}`);
+      const data = await res.json();
+      allHistory = data || [];
+      filterAndRender();
+    } catch (err) {
+      console.error(err);
+      el('historyContainer').innerHTML = `<p class="text-red-500 font-bold p-10 bg-red-50 rounded-2xl">Sync failed: ${err.message}</p>`;
+    }
+  }
+
+  function filterAndRender() {
+    const query = el('searchInput').value.toLowerCase();
+    const filtered = allHistory.filter(h => h.action.toLowerCase().includes(query));
+
+    el('historyCount').textContent = filtered.length;
+    const container = el('historyContainer');
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+                <div class="col-span-full py-24 text-center">
+                    <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-folder-open text-slate-300 text-3xl"></i>
+                    </div>
+                    <h3 class="text-slate-400 font-bold">No entries match your search</h3>
+                </div>`;
+      return;
+    }
+
+    container.innerHTML = filtered.map(item => {
+      const info = getActionMeta(item.action);
+      const preview = item.action.split(':')[1]?.substring(0, 120) || item.action.substring(0, 120);
+
+      return `
+                <div class="history-card p-8 flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <span class="badge ${info.badgeClass}">${info.label}</span>
+                        <div class="text-[10px] font-bold text-slate-400">${item.timestamp.split('T')[0]}</div>
+                    </div>
+                    
+                    <h4 class="font-bold text-slate-900 mb-4 line-clamp-1">${item.action.split(':')[0]}</h4>
+                    <p class="text-sm text-slate-500 line-clamp-3 mb-8 flex-grow leading-relaxed">${preview}...</p>
+                    
+                    <div class="flex gap-3 mt-auto pt-6 border-t border-slate-50">
+                        <button onclick='openEntryModal(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="btn-premium btn-premium-primary py-2.5 text-xs flex-grow">Review</button>
+                        <button onclick="deleteEntry(${item.id})" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all">
+                            <i class="fas fa-trash-alt text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+    }).join('');
+  }
+
+  function getActionMeta(action) {
+    const core = action.toLowerCase();
+    if (core.includes('summary')) return { label: 'Summary', badgeClass: 'badge-summary', icon: 'fa-file-lines', color: 'bg-blue-50 text-blue-600' };
+    if (core.includes('quiz')) return { label: 'Quiz', badgeClass: 'badge-quiz', icon: 'fa-tasks', color: 'bg-emerald-50 text-emerald-600' };
+    if (core.includes('flashcard')) return { label: 'Flashcards', badgeClass: 'badge-cards', icon: 'fa-clone', color: 'bg-pink-50 text-pink-600' };
+    if (core.includes('q&a') || core.includes('question')) return { label: 'Q&A', badgeClass: 'badge-qa', icon: 'fa-comments', color: 'bg-orange-50 text-orange-600' };
+    return { label: 'System', badgeClass: 'bg-slate-100 text-slate-500', icon: 'fa-gear', color: 'bg-slate-50' };
+  }
+
+  function openEntryModal(item) {
+    const meta = getActionMeta(item.action);
+    el('modalTitle').textContent = item.action.split(':')[0].substring(0, 40);
+    el('modalTimestamp').textContent = new Date(item.timestamp).toLocaleString();
+    el('modalContent').innerHTML = item.action.split(':').slice(1).join(':').replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    const iconDiv = el('modalIcon');
+    iconDiv.className = `w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${meta.color}`;
+    iconDiv.innerHTML = `<i class="fas ${meta.icon} text-xl"></i>`;
+
+    el('modalOverlay').classList.remove('hidden');
+  }
+
+  function closeModal() { el('modalOverlay').classList.add('hidden'); }
+
+  function copyModalContent() {
+    const text = el('modalContent').innerText;
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard');
+  }
+
+  async function deleteEntry(id) {
+    if (!confirm("Are you sure you want to delete this study record?")) return;
+    try {
+      await fetch(`/api/history/${id}`, { method: 'DELETE' });
+      allHistory = allHistory.filter(i => i.id !== id);
+      filterAndRender();
+    } catch (e) { alert("Delete failed"); }
+  }
+
+  async function clearAllHistory() {
+    if (!confirm("CRITICAL: This will wipe your entire history. This cannot be undone. Proceed?")) return;
+    try {
+      await fetch('/api/history/clear-all', { method: 'POST' });
+      allHistory = [];
+      filterAndRender();
+    } catch (e) { alert("Failed to clear history"); }
+  }
+</script>
+{% endblock %}

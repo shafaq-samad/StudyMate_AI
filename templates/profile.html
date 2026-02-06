@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — StudyMate AI{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12 animate-fade-in">
+        <h1 class="text-4xl md:text-5xl font-extrabold font-outfit text-slate-900 mb-4 tracking-tight">Account <span
+                class="gradient-text">Settings</span></h1>
+        <p class="text-slate-500 text-lg max-w-2xl font-medium">Manage your personal information, security, and account
+            preferences.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-12">
+        <!-- Profile Overview Card -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="premium-card p-10 text-center animate-fade-in" style="animation-delay: 0.1s">
+                <div
+                    class="w-24 h-24 rounded-3xl gradient-bg flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-200">
+                    <i class="fas fa-user-graduate text-4xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold font-outfit text-slate-900 mb-1" id="displayUsername">Loading...</h2>
+                <p class="text-slate-400 font-bold text-xs uppercase tracking-widest mb-6" id="displayEmail">Loading...
+                </p>
+                <div class="pt-6 border-t border-slate-50 flex justify-center gap-8">
+                    <div>
+                        <div class="text-lg font-bold text-slate-900" id="statHistory">0</div>
+                        <div class="text-[10px] font-bold text-slate-400 uppercase">Studies</div>
+                    </div>
+                    <div class="w-px h-8 bg-slate-100"></div>
+                </div>
+            </div>
+
+            <div class="premium-card p-6 border-dashed border-2 border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-center animate-fade-in"
+                style="animation-delay: 0.2s">
+                <i class="fas fa-shield-halved text-slate-300 text-2xl mb-4"></i>
+                <p class="text-sm font-bold text-slate-500 mb-1">Privacy Protected</p>
+                <p class="text-xs text-slate-400">Your data is encrypted and managed according to GDPR best practices.
+                </p>
+            </div>
+        </div>
+
+        <!-- Settings Area -->
+        <div class="lg:col-span-2 space-y-8 animate-fade-in" style="animation-delay: 0.3s">
+
+            <!-- Update Password -->
+            <div class="premium-card p-8">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-slate-900">Update Security</h3>
+                        <p class="text-xs text-slate-500 font-medium">Change your password to keep your account safe.
+                        </p>
+                    </div>
+                </div>
+
+                <form id="changePasswordForm" class="space-y-6 max-w-md">
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Current
+                            Password</label>
+                        <input type="password" id="oldPassword"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-6 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-600 outline-none"
+                            placeholder="••••••••" required>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">New
+                            Password</label>
+                        <input type="password" id="newPassword"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3 px-6 text-slate-800 font-medium focus:ring-2 focus:ring-indigo-600 outline-none"
+                            placeholder="••••••••" required>
+
+                        <!-- Password Strength Indicators -->
+                        <div class="grid grid-cols-2 gap-2 pt-2 px-1" id="strengthBar">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400"
+                                    data-rule="length">
+                                    <i class="fas fa-circle text-[6px]"></i> 8+ Characters
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400"
+                                    data-rule="uppercase">
+                                    <i class="fas fa-circle text-[6px]"></i> Uppercase
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400"
+                                    data-rule="number">
+                                    <i class="fas fa-circle text-[6px]"></i> Number
+                                </div>
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400"
+                                    data-rule="special">
+                                    <i class="fas fa-circle text-[6px]"></i> Special Char
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-premium btn-premium-primary px-10">Save New Password</button>
+                </form>
+            </div>
+
+            <!-- Delete Account -->
+            <div class="premium-card p-8 border-red-50 bg-red-50/10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center">
+                        <i class="fas fa-user-xmark"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg text-red-600">Danger Zone</h3>
+                        <p class="text-xs text-red-400 font-medium">Permanently remove your account and all associated
+                            data.</p>
+                    </div>
+                </div>
+
+                <p class="text-sm text-slate-500 mb-6 italic">Warning: This action is destructive and cannot be undone.
+                    All your study history will be erased forever.</p>
+
+                <button onclick="showDeleteConfirm()"
+                    class="btn-premium bg-white text-red-500 border border-red-200 hover:bg-red-500 hover:text-white">Delete
+                    My Account</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="hideDeleteConfirm()"></div>
+    <div class="relative bg-white rounded-[32px] shadow-2xl w-full max-w-md p-10 animate-fade-in text-center">
+        <div class="w-20 h-20 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-triangle-exclamation text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-slate-900 mb-2">Are you really sure?</h3>
+        <p class="text-slate-500 text-sm mb-8">Please enter your password to confirm account deletion.</p>
+
+        <input type="password" id="deleteConfirmPassword"
+            class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 px-6 text-center text-slate-900 font-bold mb-6 focus:ring-2 focus:ring-red-500 outline-none"
+            placeholder="Your Password">
+
+        <div class="flex flex-col gap-3">
+            <button id="finalDeleteBtn"
+                class="w-full py-4 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all">Yes,
+                Delete Forever</button>
+            <button onclick="hideDeleteConfirm()"
+                class="w-full py-4 rounded-2xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200 transition-all">Cancel</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        loadProfileData();
+    });
+
+    async function loadProfileData() {
+        try {
+            const res = await fetch('/api/profile');
+            const data = await res.json();
+
+            if (res.ok) {
+                document.getElementById('displayUsername').textContent = data.username;
+                document.getElementById('displayEmail').textContent = data.email;
+
+                // Load history count for stats
+                const hRes = await fetch('/api/history');
+                const hData = await hRes.json();
+                document.getElementById('statHistory').textContent = hData.length || 0;
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    // Password Strength Logic
+    const newPasswordInput = document.getElementById('newPassword');
+    const rulesElements = {
+        length: document.querySelector('[data-rule="length"]'),
+        uppercase: document.querySelector('[data-rule="uppercase"]'),
+        number: document.querySelector('[data-rule="number"]'),
+        special: document.querySelector('[data-rule="special"]')
+    };
+
+    newPasswordInput.addEventListener('input', async () => {
+        const password = newPasswordInput.value;
+        if (!password) {
+            Object.values(rulesElements).forEach(el => {
+                el.classList.replace('text-emerald-500', 'text-slate-400');
+                el.querySelector('i').classList.replace('fa-check-circle', 'fa-circle');
+            });
+            return;
+        }
+
+        const res = await fetch('/api/check-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+
+        Object.keys(rulesElements).forEach(rule => {
+            const el = rulesElements[rule];
+            if (data.rules[rule]) {
+                el.classList.replace('text-slate-400', 'text-emerald-500');
+                el.querySelector('i').classList.replace('fa-circle', 'fa-check-circle');
+            } else {
+                el.classList.replace('text-emerald-500', 'text-slate-400');
+                el.querySelector('i').classList.replace('fa-check-circle', 'fa-circle');
+            }
+        });
+    });
+
+    // Change Password Logic
+    document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const old_password = document.getElementById('oldPassword').value;
+        const new_password = document.getElementById('newPassword').value;
+        const btn = e.target.querySelector('button');
+
+        btn.disabled = true;
+        btn.textContent = "Updating...";
+
+        try {
+            const res = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ old_password, new_password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                alert('Password updated successfully!');
+                e.target.reset();
+            } else {
+                alert(data.error || 'Update failed');
+            }
+        } catch (err) { alert('Server error'); }
+        finally {
+            btn.disabled = false;
+            btn.textContent = "Save New Password";
+        }
+    });
+
+    // Delete Account Logic
+    function showDeleteConfirm() { document.getElementById('deleteModal').classList.remove('hidden'); }
+    function hideDeleteConfirm() { document.getElementById('deleteModal').classList.add('hidden'); }
+
+    document.getElementById('finalDeleteBtn').addEventListener('click', async () => {
+        const password = document.getElementById('deleteConfirmPassword').value;
+        if (!password) return alert('Password required');
+
+        try {
+            const res = await fetch('/api/delete-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.removeItem('loggedInUser');
+                window.location.href = '/';
+            } else {
+                alert(data.error || 'Deletion failed');
+            }
+        } catch (err) { alert('Server error'); }
+    });
+</script>
+{% endblock %}

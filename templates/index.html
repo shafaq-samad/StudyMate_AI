@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}StudyMate AI — Intelligent Learning Assistant{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative pt-20 pb-16 overflow-hidden">
+  <!-- Background Accents -->
+  <div
+    class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-indigo-50/50 rounded-full blur-3xl -z-10">
+  </div>
+  <div
+    class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-violet-50/50 rounded-full blur-3xl -z-10">
+  </div>
+
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-16 items-center">
+      <div class="space-y-8 animate-fade-in">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-sm font-semibold">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          Powered by Groq & Gemini AI
+        </div>
+
+        <h1
+          class="text-5xl md:text-6xl lg:text-7xl font-extrabold font-outfit leading-[1.1] tracking-tight text-slate-900">
+          Master any subject <br />
+          <span class="gradient-text">twice as fast.</span>
+        </h1>
+
+        <p class="text-lg text-slate-600 leading-relaxed max-w-xl">
+          Transformation from tedious reading to active learning.
+          Upload your notes, and let our AI generate summaries,
+          targeted quizzes, and interactive flashcards in seconds.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 pt-4">
+          <a href="/app" class="btn-premium btn-premium-primary text-lg px-10">
+            <i class="fas fa-bolt"></i> Get Started Free
+          </a>
+          <a href="#features" class="btn-premium btn-premium-secondary text-lg px-8">
+            Learn More
+          </a>
+        </div>
+
+        <div class="flex items-center gap-6 pt-8 border-t border-slate-100">
+          <div class="flex -space-x-3">
+            <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+            <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+            <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+            <div
+              class="w-10 h-10 rounded-full border-2 border-white bg-indigo-600 flex items-center justify-center text-[10px] text-white font-bold">
+              +2k</div>
+          </div>
+          <div class="text-sm text-slate-500">
+            <span class="font-bold text-slate-900">2,000+ students</span> joined this week
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Illustration (Pure CSS Premium Card) -->
+      <div class="relative hidden lg:block animate-fade-in" style="animation-delay: 0.2s">
+        <div class="premium-card p-0 overflow-hidden border-indigo-100 shadow-2xl shadow-indigo-100/50">
+          <div class="bg-slate-900 p-6 flex items-center justify-between">
+            <div class="flex gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-400"></div>
+              <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+              <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+            </div>
+            <div class="text-[10px] text-slate-400 font-mono">STUDYMATE-AI-CORE.v2</div>
+          </div>
+          <div class="p-8 space-y-6 bg-white">
+            <div class="space-y-3">
+              <div class="h-4 bg-slate-100 rounded-full w-3/4"></div>
+              <div class="h-4 bg-slate-100 rounded-full w-full"></div>
+              <div class="h-4 bg-slate-100 rounded-full w-2/3"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+                <div class="text-xs text-indigo-600 font-bold mb-1">ACCURACY</div>
+                <div class="text-2xl font-bold text-slate-900">99.8%</div>
+              </div>
+              <div class="p-4 rounded-2xl bg-violet-50 border border-violet-100">
+                <div class="text-xs text-violet-600 font-bold mb-1">LATENCY</div>
+                <div class="text-2xl font-bold text-slate-900">140ms</div>
+              </div>
+            </div>
+            <button
+              class="w-full py-4 rounded-2xl gradient-bg text-white font-bold flex items-center justify-center gap-3">
+              <i class="fas fa-sparkles"></i> Processing...
+            </button>
+          </div>
+        </div>
+
+        <!-- Floating Elements -->
+        <div
+          class="absolute -top-10 -right-10 w-32 h-32 bg-amber-100 rounded-3xl blur-2xl opacity-60 -z-10 animate-pulse">
+        </div>
+        <div
+          class="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-60 -z-10 animate-bounce"
+          style="animation-duration: 4s"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Grid -->
+<section id="features" class="py-24 bg-white relative">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center max-w-3xl mx-auto mb-20 space-y-4">
+      <h2 class="text-indigo-600 font-bold tracking-widest text-sm uppercase">Capabilities</h2>
+      <h3 class="text-4xl md:text-5xl font-extrabold font-outfit text-slate-900">The ultimate study toolkit.</h3>
+      <p class="text-slate-500 text-lg">Designed by top-performing students and AI experts to maximize your efficiency.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Feature 1 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+          <i class="fas fa-wand-magic-sparkles text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">AI Deep Summary</h4>
+        <p class="text-slate-500 leading-relaxed">Extract core concepts from massive documents in any of the 3 detail
+          levels.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 mb-6 group-hover:scale-110 group-hover:bg-violet-600 group-hover:text-white transition-all">
+          <i class="fas fa-brain text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">Interactive Q&A</h4>
+        <p class="text-slate-500 leading-relaxed">Chat with your documents. Ask anything and get context-aware answers
+          instantly.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-6 group-hover:scale-110 group-hover:bg-amber-600 group-hover:text-white transition-all">
+          <i class="fas fa-check-double text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">Auto Quiz Engine</h4>
+        <p class="text-slate-500 leading-relaxed">Turn your notes into MCQs and True/False tests to validate your
+          knowledge.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+          <i class="fas fa-file-invoice text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">Doc Extractor</h4>
+        <p class="text-slate-500 leading-relaxed">Smart recognition for PDF, DOCX, and TXT files up to 10MB each.</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-600 mb-6 group-hover:scale-110 group-hover:bg-rose-600 group-hover:text-white transition-all">
+          <i class="fas fa-layer-group text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">Smart Flashcards</h4>
+        <p class="text-slate-500 leading-relaxed">AI picks the most important terms and creates memorization cards for
+          you.</p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="premium-card group">
+        <div
+          class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-600 mb-6 group-hover:scale-110 group-hover:bg-sky-600 group-hover:text-white transition-all">
+          <i class="fas fa-hourglass-half text-2xl"></i>
+        </div>
+        <h4 class="text-xl font-bold mb-3">Study Timer</h4>
+        <p class="text-slate-500 leading-relaxed">Built-in Pomodoro timer to maintain focus and track your study
+          sessions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
