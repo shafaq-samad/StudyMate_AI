@@ -8,3 +8,5 @@ PyPDF2
 python-dotenv
 cryptography
 gunicorn
+psycopg2-binary
+flask-limiter

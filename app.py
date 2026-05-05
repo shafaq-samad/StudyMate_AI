@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_mail import Mail, Message
 import google.generativeai as genai
 from groq import Groq
 import tempfile
 import os
+import io
 import time
 import secrets
 from datetime import datetime, timedelta
@@ -11,7 +14,8 @@ from werkzeug.utils import secure_filename
 import docx2txt
 import PyPDF2
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
+import psycopg2
+from psycopg2 import extras
 import re
 from dotenv import load_dotenv
 
@@ -25,14 +29,30 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24))
 app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
 app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
 app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False') == 'True'
 app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
 app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_USERNAME')
 
 mail = Mail(app)
 
-# Database setup
-DB_FILE = "users.db"
+# Rate Limiting Setup
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
+
+# Database configuration
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+def get_db_connection():
+    """Create a connection to the PostgreSQL database"""
+    if not DATABASE_URL:
+        raise ValueError("DATABASE_URL environment variable is not set")
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
 
 
 def wants_json():
@@ -78,34 +98,28 @@ def validate_password(password):
     }
     return rules
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     # Users table
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cur.execute('''CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
                     username TEXT UNIQUE NOT NULL,
                     email TEXT UNIQUE NOT NULL,
                     password TEXT NOT NULL,
                     reset_token TEXT,
-                    reset_token_expiry DATETIME
+                    reset_token_expiry TIMESTAMP
                 )''')
-    # Migration: Add reset_token and reset_token_expiry if they don't exist
-    try:
-        c.execute("ALTER TABLE users ADD COLUMN reset_token TEXT")
-        c.execute("ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME")
-    except sqlite3.OperationalError:
-        # Columns already exist
-        pass
     
     # History table
-    c.execute('''CREATE TABLE IF NOT EXISTS history (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cur.execute('''CREATE TABLE IF NOT EXISTS history (
+                    id SERIAL PRIMARY KEY,
                     user_id INTEGER NOT NULL,
                     action TEXT NOT NULL,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY(user_id) REFERENCES users(id)
                 )''')
     conn.commit()
+    cur.close()
     conn.close()
 
 init_db()
@@ -136,14 +150,14 @@ def signup():
 
     hashed_pw = generate_password_hash(password)
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+        c.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
                   (username, email, hashed_pw))
         conn.commit()
         conn.close()
         return jsonify({'message': 'Signup successful'}), 201
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({'error': 'Username or email already exists'}), 400
     
 @app.route('/api/signup', methods=['POST'])
@@ -168,14 +182,14 @@ def api_signup():
 
     hashed_pw = generate_password_hash(password)
     try:
-        conn = sqlite3.connect(DB_FILE)
+        conn = get_db_connection()
         c = conn.cursor()
-        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+        c.execute("INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
                   (username, email, hashed_pw))
         conn.commit()
         conn.close()
         return jsonify({'message': 'Signup successful'}), 201
-    except sqlite3.IntegrityError:
+    except psycopg2.IntegrityError:
         return jsonify({'error': 'Username or email already exists'}), 400
     
 @app.route('/api/check-password', methods=['POST'])
@@ -198,10 +212,11 @@ def api_login():
     email = data.get('email')
     password = data.get('password')
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT id, password, username FROM users WHERE email=?", (email,))
+    c.execute("SELECT id, password, username FROM users WHERE email=%s", (email,))
     user = c.fetchone()
+    c.close()
     conn.close()
 
     if user and check_password_hash(user[1], password):
@@ -235,10 +250,11 @@ def get_profile():
     if not user_id:
         return jsonify({'error': 'Unauthorized'}), 401
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT username, email FROM users WHERE id=?", (user_id,))
+    c.execute("SELECT username, email FROM users WHERE id=%s", (user_id,))
     user = c.fetchone()
+    c.close()
     conn.close()
     
     if user:
@@ -261,12 +277,13 @@ def change_password():
     if not old_password or not new_password:
         return jsonify({'error': 'All fields are required'}), 400
         
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT password FROM users WHERE id=?", (user_id,))
+    c.execute("SELECT password FROM users WHERE id=%s", (user_id,))
     user = c.fetchone()
     
     if not user or not check_password_hash(user[0], old_password):
+        c.close()
         conn.close()
         return jsonify({'error': 'Incorrect current password'}), 400
         
@@ -277,8 +294,9 @@ def change_password():
         return jsonify({'error': 'New password does not meet requirements', 'rules': rules}), 400
         
     hashed_pw = generate_password_hash(new_password)
-    c.execute("UPDATE users SET password=? WHERE id=?", (hashed_pw, user_id))
+    c.execute("UPDATE users SET password=%s WHERE id=%s", (hashed_pw, user_id))
     conn.commit()
+    c.close()
     conn.close()
     
     return jsonify({'message': 'Password updated successfully'}), 200
@@ -295,19 +313,21 @@ def delete_account():
     if not password:
         return jsonify({'error': 'Password is required to confirm deletion'}), 400
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT password FROM users WHERE id=?", (user_id,))
+    c.execute("SELECT password FROM users WHERE id=%s", (user_id,))
     user = c.fetchone()
     
     if not user or not check_password_hash(user[0], password):
+        c.close()
         conn.close()
         return jsonify({'error': 'Incorrect password'}), 400
         
     # Delete everything related to the user
-    c.execute("DELETE FROM history WHERE user_id=?", (user_id,))
-    c.execute("DELETE FROM users WHERE id=?", (user_id,))
+    c.execute("DELETE FROM history WHERE user_id=%s", (user_id,))
+    c.execute("DELETE FROM users WHERE id=%s", (user_id,))
     conn.commit()
+    c.close()
     conn.close()
     
     session.clear()
@@ -331,21 +351,21 @@ def api_forgot_password():
     if not email:
         return jsonify({'error': 'Email is required'}), 400
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT id FROM users WHERE email=?", (email,))
+    c.execute("SELECT id FROM users WHERE email=%s", (email,))
     user = c.fetchone()
     
     if user:
         token = secrets.token_urlsafe(32)
-        expiry = (datetime.now() + timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S')
+        expiry = datetime.now() + timedelta(hours=1)
         
-        c.execute("UPDATE users SET reset_token=?, reset_token_expiry=? WHERE id=?", 
+        c.execute("UPDATE users SET reset_token=%s, reset_token_expiry=%s WHERE id=%s", 
                   (token, expiry, user[0]))
         conn.commit()
         
         # Send Email
-        reset_url = url_for('reset_password', token=token, _external=True)
+        reset_url = url_for('reset_password_page', token=token, _external=True)
         msg = Message('Password Reset Request - StudyMate AI',
                       recipients=[email])
         msg.body = f'''To reset your password, visit the following link:
@@ -357,9 +377,12 @@ This link will expire in 1 hour.
         try:
             mail.send(msg)
         except Exception as e:
+            c.close()
+            conn.close()
             print(f"Error sending email: {e}")
-            return jsonify({'error': 'Failed to send reset email. Please try again later.'}), 500
+            return jsonify({'error': f'Email error: {str(e)}'}), 500
             
+    c.close()
     conn.close()
     
     # Always return success to prevent email enumeration
@@ -371,17 +394,18 @@ def forgot_password_page():
 
 @app.route('/reset-password/<token>', methods=['GET'])
 def reset_password_page(token):
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT id, reset_token_expiry FROM users WHERE reset_token=?", (token,))
+    c.execute("SELECT id, reset_token_expiry FROM users WHERE reset_token=%s", (token,))
     user = c.fetchone()
+    c.close()
     conn.close()
     
     if not user:
         return "Invalid or expired token", 400
         
     # Check expiry
-    expiry = datetime.strptime(user[1], '%Y-%m-%d %H:%M:%S')
+    expiry = user[1]
     if expiry < datetime.now():
         return "Token has expired", 400
 
@@ -389,9 +413,9 @@ def reset_password_page(token):
 
 @app.route('/api/reset-password/<token>', methods=['POST'])
 def api_reset_password(token):
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT id, reset_token_expiry FROM users WHERE reset_token=?", (token,))
+    c.execute("SELECT id, reset_token_expiry FROM users WHERE reset_token=%s", (token,))
     user = c.fetchone()
     
     if not user:
@@ -399,7 +423,7 @@ def api_reset_password(token):
         return jsonify({'error': 'Invalid or expired token'}), 400
         
     # Check expiry
-    expiry = datetime.strptime(user[1], '%Y-%m-%d %H:%M:%S')
+    expiry = user[1]
     if expiry < datetime.now():
         conn.close()
         return jsonify({'error': 'Token has expired'}), 400
@@ -418,9 +442,10 @@ def api_reset_password(token):
         return jsonify({'error': 'Password does not meet requirements', 'rules': password_rules}), 400
         
     hashed_pw = generate_password_hash(new_password)
-    c.execute("UPDATE users SET password=?, reset_token=NULL, reset_token_expiry=NULL WHERE id=?", 
+    c.execute("UPDATE users SET password=%s, reset_token=NULL, reset_token_expiry=NULL WHERE id=%s", 
               (hashed_pw, user[0]))
     conn.commit()
+    c.close()
     conn.close()
     
     return jsonify({'message': 'Password has been reset successfully'}), 200
@@ -439,15 +464,16 @@ def api_history():
     sort = request.args.get('sort', 'desc')  # desc or asc
     search = request.args.get('search', '').strip()
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
     
     if search:
-        c.execute("SELECT id, action, timestamp FROM history WHERE user_id=? AND action LIKE ? ORDER BY timestamp DESC" if sort == 'desc' else "SELECT id, action, timestamp FROM history WHERE user_id=? AND action LIKE ? ORDER BY timestamp ASC", (user_id, f'%{search}%'))
+        c.execute("SELECT id, action, timestamp FROM history WHERE user_id=%s AND action LIKE %s ORDER BY timestamp DESC" if sort == 'desc' else "SELECT id, action, timestamp FROM history WHERE user_id=%s AND action LIKE %s ORDER BY timestamp ASC", (user_id, f'%{search}%'))
     else:
-        c.execute("SELECT id, action, timestamp FROM history WHERE user_id=? ORDER BY timestamp DESC" if sort == 'desc' else "SELECT id, action, timestamp FROM history WHERE user_id=? ORDER BY timestamp ASC", (user_id,))
+        c.execute("SELECT id, action, timestamp FROM history WHERE user_id=%s ORDER BY timestamp DESC" if sort == 'desc' else "SELECT id, action, timestamp FROM history WHERE user_id=%s ORDER BY timestamp ASC", (user_id,))
     
     records = c.fetchall()
+    c.close()
     conn.close()
     
     history_list = [{'id': row[0], 'action': row[1], 'timestamp': row[2]} for row in records]
@@ -459,18 +485,21 @@ def delete_history(entry_id):
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({'error': 'Unauthorized'}), 401
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("SELECT user_id FROM history WHERE id=?", (entry_id,))
+    c.execute("SELECT user_id FROM history WHERE id=%s", (entry_id,))
     row = c.fetchone()
     if not row:
+        c.close()
         conn.close()
         return jsonify({'error': 'Not found'}), 404
     if row[0] != user_id:
+        c.close()
         conn.close()
         return jsonify({'error': 'Forbidden'}), 403
-    c.execute("DELETE FROM history WHERE id=?", (entry_id,))
+    c.execute("DELETE FROM history WHERE id=%s", (entry_id,))
     conn.commit()
+    c.close()
     conn.close()
     return jsonify({'message': 'Deleted'}), 200
 
@@ -480,10 +509,11 @@ def clear_all_history():
     user_id = session.get('user_id')
     if not user_id:
         return jsonify({'error': 'Unauthorized'}), 401
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("DELETE FROM history WHERE user_id=?", (user_id,))
+    c.execute("DELETE FROM history WHERE user_id=%s", (user_id,))
     conn.commit()
+    c.close()
     conn.close()
     return jsonify({'message': 'All history cleared'}), 200
 
@@ -492,10 +522,11 @@ def clear_all_history():
 # -------------------------
 
 def log_action(user_id, action):
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     c = conn.cursor()
-    c.execute("INSERT INTO history (user_id, action) VALUES (?, ?)", (user_id, action))
+    c.execute("INSERT INTO history (user_id, action) VALUES (%s, %s)", (user_id, action))
     conn.commit()
+    c.close()
     conn.close()
 # Regular pages
 @app.route("/app")
@@ -519,6 +550,7 @@ def contact_page():
     return render_template("contact.html")
 
 @app.route('/api/contact', methods=['POST'])
+@limiter.limit("10 per hour")
 def api_contact():
     data = request.get_json()
     name = data.get('name')
@@ -577,21 +609,38 @@ if not GEMINI_API_KEY:
     raise ValueError("GEMINI_API_KEY not found in environment variables")
 
 genai.configure(api_key=GEMINI_API_KEY)
-# Try available Gemini models in order of preference
-MODEL_NAMES = ["gemini-pro", "gemini-1.5-pro", "gemini-1.5-flash"]
-model = None
-for model_name in MODEL_NAMES:
-    try:
-        model = genai.GenerativeModel(model_name)
-        print(f"Using Gemini model: {model_name}")
-        break
-    except Exception as e:
-        print(f"Model {model_name} not available: {e}")
-        continue
 
-if not model:
-    print("Warning: No Gemini model available")
-    model = genai.GenerativeModel("gemini-pro")  # Default fallback
+
+def get_gemini_model():
+    """Discover the first Gemini model that supports generateContent."""
+    preferred_models = ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-pro"]
+
+    try:
+        available_models = list(genai.list_models())
+        supported_model_names = {
+            model.name.split("/")[-1]
+            for model in available_models
+            if "generateContent" in getattr(model, "supported_generation_methods", [])
+        }
+
+        for model_name in preferred_models:
+            if model_name in supported_model_names:
+                print(f"Using Gemini model: {model_name}")
+                return genai.GenerativeModel(model_name)
+
+        for model in available_models:
+            if "generateContent" in getattr(model, "supported_generation_methods", []):
+                model_name = model.name.split("/")[-1]
+                print(f"Using Gemini model: {model_name}")
+                return genai.GenerativeModel(model_name)
+    except Exception as e:
+        print(f"Gemini model discovery failed: {e}")
+
+    print("Warning: Falling back to gemini-1.5-flash")
+    return genai.GenerativeModel("gemini-1.5-flash")
+
+
+model = get_gemini_model()
 
 # Groq API Configuration (Fallback)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -609,14 +658,15 @@ def extract_file_text(file, ext):
     if ext == "txt":
         return file.read().decode("utf-8")
     elif ext == "pdf":
-        reader = PyPDF2.PdfReader(file)
+        # Process PDF entirely in memory
+        file_stream = io.BytesIO(file.read())
+        reader = PyPDF2.PdfReader(file_stream)
         text = " ".join(page.extract_text() or "" for page in reader.pages)
         return text
     elif ext == "docx":
-        tmp_path = os.path.join(tempfile.gettempdir(), secure_filename(file.filename))
-        file.save(tmp_path)
-        text = docx2txt.process(tmp_path)
-        os.remove(tmp_path)
+        # docx2txt can handle a file-like object (stream) via io.BytesIO
+        file_stream = io.BytesIO(file.read())
+        text = docx2txt.process(file_stream)
         return text
     return ""
 
@@ -633,7 +683,10 @@ def call_gemini(prompt, max_retries=2):
             elif hasattr(response, "candidates") and response.candidates:
                 return response.candidates[0].content.strip()
         except Exception as e:
+            error_text = str(e).lower()
             print(f"Gemini API Error (attempt {attempt + 1}/{max_retries}):", e)
+            if any(token in error_text for token in ["quota", "resource exhausted", "rate limit", "429"]):
+                return "__GEMINI_QUOTA_EXCEEDED__"
             if attempt < max_retries - 1:
                 time.sleep(2 ** attempt)  # Exponential backoff: 1s, 2s, etc.
     return None
@@ -684,19 +737,20 @@ def call_ai(prompt):
     """
     # Try Gemini first (primary service)
     result = call_gemini(prompt)
+    if result == "__GEMINI_QUOTA_EXCEEDED__":
+        print("⚠ Gemini quota exceeded, trying Groq...")
+        result = call_groq(prompt)
+        if result:
+            print("✓ Response generated using Groq (Gemini quota fallback)")
+            return result
+        print("✗ Groq fallback failed after Gemini quota exhaustion")
+        return None
+
     if result:
         print("✓ Response generated using Gemini")
         return result
-    
-    # Fallback to Groq (free alternative)
-    print("⚠ Gemini failed, trying Groq...")
-    result = call_groq(prompt)
-    if result:
-        print("✓ Response generated using Groq (Fallback)")
-        return result
-    
-    # If both fail, return None
-    print("✗ Both AI services failed")
+
+    print("✗ Gemini failed before quota fallback was triggered")
     return None
 
 
@@ -708,6 +762,7 @@ def home():
     return render_template("index.html")
 
 @app.route("/api/summarize", methods=["POST"])
+@limiter.limit("5 per minute")
 def summarize():
     user_id = session.get('user_id')
     data = request.get_json()
@@ -757,6 +812,7 @@ def summarize():
 
 
 @app.route("/api/ask", methods=["POST"])
+@limiter.limit("5 per minute")
 def ask_question():
     user_id = session.get('user_id')
     data = request.get_json()
@@ -786,6 +842,7 @@ def ask_question():
 
 
 @app.route("/api/quiz", methods=["POST"])
+@limiter.limit("5 per minute")
 def generate_quiz():
     user_id = session.get('user_id')
     data = request.get_json()
@@ -830,6 +887,7 @@ def generate_quiz():
     return jsonify({"quiz": quiz_data})
 
 @app.route("/api/flashcards", methods=["POST"])
+@limiter.limit("5 per minute")
 def generate_flashcards():
     user_id = session.get('user_id')
     data = request.get_json()

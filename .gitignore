@@ -1,7 +1,22 @@
+# Environment secrets
 .env
+
+# Databases
+*.db
+*.db.bak
+
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
-users.db
-users.db.bak
+venv/
+env/
+
+# IDEs
+.vs/
 .vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

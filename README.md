@@ -1,91 +1,83 @@
-# StudyMate AI 🧠
-### *The Ultimate Intelligent Learning Assistant*
+# StudyMate AI
 
-StudyMate AI is a premium, full-stack educational platform designed to transform tedious studying into active, efficient learning. By leveraging the power of **Google Gemini 1.5 Pro** and **Groq Cloud AI**, the platform offers a suite of advanced tools to help students master any subject twice as fast.
+StudyMate AI is a Flask-based study assistant that helps users summarize notes, ask questions about their documents, generate quizzes, and create flashcards. It uses Gemini first, with Groq as a fallback when Gemini quota is exhausted.
 
-[![Deployment Status](https://img.shields.io/badge/Deployment-Ready-brightgreen)](https://render.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/)
+## Features
 
----
+- Smart text summarization in short, medium, and long formats
+- Document-based Q&A
+- Quiz generation for MCQ and True/False practice
+- Flashcard generation for revision
+- `.txt`, `.pdf`, and `.docx` upload support
+- User accounts, study history, and password reset flow
+- Rate limiting on AI endpoints
 
-## 🌟 Key Features
+## Tech Stack
 
-*   **⚡ Smart Summarizer**: Distill complex documents into 3 levels of detail (Short, Medium, Comprehensive).
-*   **🧪 AI Quiz Generator**: Instantly turn your notes into MCQs and True/False assessments.
-*   **🎴 Active Recall Flashcards**: AI-curated flashcards for high-impact memorization.
-*   **💬 Document Intel (Q&A)**: Chat with your PDF, DOCX, or TXT files for context-aware answers.
-*   **📁 File Lab**: Advanced extraction lab for processing academic materials up to 10MB.
-*   **⏲️ Deep Focus Timer**: Built-in Pomodoro timer with cycle tracking and focus analytics.
-*   **📜 Intel Repository**: Complete history of all your AI generations with review and management capabilities.
-*   **🔐 Professional Auth**: Secure login/signup system with password reset flow and profile management.
+- Flask
+- Gunicorn
+- PostgreSQL
+- Google Gemini
+- Groq
+- Flask-Mail
+- Flask-Limiter
+- PyPDF2
+- docx2txt
 
----
+## Project Structure
 
-## 🛠️ Technology Stack
+- `app.py`: Main Flask app and API routes
+- `templates/`: HTML templates
+- `static/`: CSS, JavaScript, and images
+- `requirements.txt`: Python dependencies
+- `Procfile`: Gunicorn startup command for Render
+- `runtime.txt`: Python version for deployment
 
-*   **Frontend**: HTML5, Vanilla JavaScript, **Tailwind CSS**, FontAwesome (Premium Design System).
-*   **Backend**: Python, **Flask**, Gunicorn (Production WSGI).
-*   **AI Engines**: Google Generative AI (Gemini), Groq API (LLaMA-3/Mixtral).
-*   **Database**: SQLite (ACID compliant user data and session management).
-*   **Deployment**: Procfile-ready for Railway/Render.
+## Local Setup
 
----
+1. Clone the repository.
+2. Install dependencies:
 
-## 🚀 Getting Started
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 1. Prerequisites
-*   Python 3.11+
-*   Google Gemini API Key
-*   Groq API Key
+3. Create a `.env` file with the environment variables below.
+4. Run the app locally:
 
-### 2. Installation
-Clone the repository and install dependencies:
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   python app.py
+   ```
 
-### 3. Configuration
-Create a `.env` file in the root directory and add your keys:
-```env
-GEMINI_API_KEY=your_gemini_key
-GROQ_API_KEY=your_groq_key
-FLASK_SECRET_KEY=your_secret_key
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=True
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-```
+## Environment Variables
 
-### 4. Run Locally
-```bash
-python app.py
-```
-Visit `http://localhost:5000` to start learning!
+| Variable | Description |
+| --- | --- |
+| `FLASK_SECRET_KEY` | Secret key for sessions |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `GEMINI_API_KEY` | Gemini API key |
+| `GROQ_API_KEY` | Groq API key |
+| `MAIL_SERVER` | SMTP host |
+| `MAIL_PORT` | SMTP port, usually `587` |
+| `MAIL_USERNAME` | SMTP username / email address |
+| `MAIL_PASSWORD` | SMTP password or app password |
+| `MAIL_USE_TLS` | `True` or `False` |
+| `MAIL_USE_SSL` | `True` or `False` |
 
----
+## Deploy To Render
 
-## ☁️ Deployment (Railway / Render)
+1. Push the project to GitHub.
+2. In Render, create a new **Web Service** and connect the repository.
+3. Use these settings:
+   - **Environment**: Python
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app --workers 1 --threads 4 --timeout 120`
+4. Set the environment variables from the table above in the Render dashboard.
+5. Add your PostgreSQL database URL in `DATABASE_URL`.
+6. Deploy the service and wait for the first build to finish.
 
-This project is configured for one-click deployment:
-1.  **Repository**: Push this code to your GitHub.
-2.  **Platform**: Connect your repository to [Railway.app](https://railway.app) or [Render.com](https://render.com).
-3.  **Environment**: Add your `.env` variables in the platform's dashboard.
-4.  **Automatic**: The platform will detect the `Procfile` and `runtime.txt` and deploy automatically.
+## Notes For Render
 
----
-
-## 🛡️ Privacy & Compliance
-*   **Data Sovereignty**: Users can delete their entire account and history at any time through the Profile settings.
-*   **Secure Processing**: Files are processed in real-time and are never stored on the server permanently.
-*   **Encryption**: All passwords are encrypted using industry-standard hashing algorithms (PBKDF2).
-
----
-
-## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-*Created with ❤️ for students everywhere.*
-
+- The app uses `runtime.txt` to pin Python `3.11.0`.
+- Keep the `Procfile` start command aligned with Render if you change worker settings.
+- If Gemini returns quota or rate-limit errors, the app automatically falls back to Groq.
