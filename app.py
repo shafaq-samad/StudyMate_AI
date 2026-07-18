@@ -98,6 +98,10 @@ def validate_password(password):
     }
     return rules
 def init_db():
+    # In a serverless environment, this might be called frequently.
+    # For production, it's better to initialize the DB manually or via a separate script.
+    if os.getenv("VERCEL_ENV") == "production" or os.getenv("RENDER"):
+        return
     conn = get_db_connection()
     cur = conn.cursor()
     # Users table
@@ -121,8 +125,6 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-
-init_db()
 
 # -------------------------
 # LOGIN / SIGNUP ROUTES
@@ -961,5 +963,6 @@ def handle_all_errors(error):
     return render_template('error.html', error=error), 500
 
 if __name__ == "__main__":
+    init_db() # Initialize DB only when running locally
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

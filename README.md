@@ -64,6 +64,21 @@ StudyMate AI is a Flask-based study assistant that helps users summarize notes, 
 | `MAIL_USE_TLS` | `True` or `False` |
 | `MAIL_USE_SSL` | `True` or `False` |
 
+## Deploy to Vercel
+
+1. Push the project to GitHub.
+2. Create a `vercel.json` file in the root of your project (see example below).
+3. In Vercel, create a new project and connect the repository.
+4. Vercel should automatically detect it as a Python project.
+5. Set the environment variables from the table above in the Vercel dashboard.
+6. Add your PostgreSQL database URL in `DATABASE_URL`.
+7. Deploy the project. Vercel will use `app.py` as the serverless entry point.
+
+### Note for Vite Frontend
+
+If you are using a separate Vite frontend, set its `VITE_API_URL` environment variable to the URL of your deployed Vercel backend (e.g., `https://your-project.vercel.app`).
+
+
 ## Deploy To Render
 
 1. Push the project to GitHub.
@@ -75,6 +90,11 @@ StudyMate AI is a Flask-based study assistant that helps users summarize notes, 
 4. Set the environment variables from the table above in the Render dashboard.
 5. Add your PostgreSQL database URL in `DATABASE_URL`.
 6. Deploy the service and wait for the first build to finish.
+
+### Note for Vite Frontend
+
+If you are deploying a separate Vite frontend on Render (or another service), set its `VITE_API_URL` environment variable to the URL of your deployed Render backend (e.g., `https://your-backend-service.onrender.com`).
+
 
 ## Notes For Render
 
